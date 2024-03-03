@@ -1,0 +1,3 @@
+name: vyp
+hardhat:
+  host: auto
