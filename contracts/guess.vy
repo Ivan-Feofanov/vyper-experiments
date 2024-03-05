@@ -61,3 +61,11 @@ def add_outcome(_idx: int128, _name: String[50], _description: String[500]):
     assert len(self.facts[_idx].outcomes) < 5, "Maximum outcomes reached"
     self.facts[_idx].outcomes.append(Outcome({name: _name, description: _description}))
     log oracle_added(msg.sender, len(self.facts[_idx].outcomes))
+
+
+@external
+def start_guess(_idx: int128):
+    assert self.facts[_idx].status == Status.DRAFT, "The fact is not draft"
+    assert len(self.facts[_idx].outcomes) > 1, "Minimum outcomes not reached"
+    assert len(self.facts[_idx].oracles) > 0, "Minimum oracles not reached"
+    self.facts[_idx].status = Status.OPEN

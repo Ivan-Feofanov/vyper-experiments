@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from enum import IntEnum
 
 import pytest
+from ape import exceptions
 from faker import Faker
 
 fake = Faker()
@@ -89,3 +90,50 @@ def test_add_outcome(guess_service, fact, sender):
     assert created_fact.outcomes[0].description == fact.outcomes[0].description
     assert created_fact.outcomes[1].name == fact.outcomes[1].name
     assert created_fact.outcomes[1].description == fact.outcomes[1].description
+
+
+def test_run_guess(guess_service, fact, oracles, sender):
+    guess_service.create_fact(fact.name, fact.description, sender=sender)
+    guess_service.add_oracle(0, oracles[0], sender=sender)
+    guess_service.add_oracle(0, oracles[1], sender=sender)
+    guess_service.add_outcome(
+        0, fact.outcomes[0].name, fact.outcomes[0].description, sender=sender
+    )
+    guess_service.add_outcome(
+        0, fact.outcomes[1].name, fact.outcomes[1].description, sender=sender
+    )
+
+    guess_service.start_guess(0, sender=sender)
+    created_fact = guess_service.get_fact(0)
+
+    assert created_fact.status == Status.OPEN
+
+
+def test_run_guess__no_outcomes(guess_service, fact, oracles, sender):
+    guess_service.create_fact(fact.name, fact.description, sender=sender)
+    guess_service.add_oracle(0, oracles[0], sender=sender)
+    guess_service.add_oracle(0, oracles[1], sender=sender)
+
+    with pytest.raises(exceptions.ContractLogicError) as exc:
+        guess_service.start_guess(0, sender=sender)
+    created_fact = guess_service.get_fact(0)
+
+    assert exc.value.message == "Minimum outcomes not reached"
+    assert created_fact.status == Status.DRAFT
+
+
+def test_run_guess__no_oracles(guess_service, fact, sender):
+    guess_service.create_fact(fact.name, fact.description, sender=sender)
+    guess_service.add_outcome(
+        0, fact.outcomes[0].name, fact.outcomes[0].description, sender=sender
+    )
+    guess_service.add_outcome(
+        0, fact.outcomes[1].name, fact.outcomes[1].description, sender=sender
+    )
+
+    with pytest.raises(exceptions.ContractLogicError) as exc:
+        guess_service.start_guess(0, sender=sender)
+    created_fact = guess_service.get_fact(0)
+
+    assert exc.value.message == "Minimum oracles not reached"
+    assert created_fact.status == Status.DRAFT
