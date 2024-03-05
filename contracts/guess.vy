@@ -58,7 +58,7 @@ def add_oracle(_idx: int128, _oracle: address):
 @external
 def add_outcome(_idx: int128, _name: String[50], _description: String[500]):
     assert self.facts[_idx].owner == msg.sender, "Only the owner can add outcomes"
-    assert len(self.facts[_idx].outcomes) < 5, "Maximum outcomes reached"
+    # assert len(self.facts[_idx].outcomes) < 5, "Maximum outcomes reached"
     self.facts[_idx].outcomes.append(Outcome({name: _name, description: _description}))
     log oracle_added(msg.sender, len(self.facts[_idx].outcomes))
 
