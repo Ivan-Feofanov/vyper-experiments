@@ -9,3 +9,8 @@ def owner(accounts):
 @pytest.fixture
 def sender(accounts):
     return accounts[1]
+
+
+@pytest.fixture
+def oracles(accounts):
+    return accounts[2:5]

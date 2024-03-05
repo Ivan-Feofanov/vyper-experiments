@@ -1,45 +1,63 @@
 #pragma version ^0.3.10
 
 enum Status:
+    DRAFT
     OPEN
     FINISHED
     CANCELED
 
-enum OutcomeTypes:
-    A
-    B
-
-struct Fact:
+struct Outcome:
     name: String[50]
     description: String[500]
 
-struct Outcome:
-    name: String[20]
-    description: String[100]
+struct Fact:
+    owner: address
+    name: String[50]
+    description: String[500]
+    oracles: DynArray[address, 3]
+    outcomes: DynArray[Outcome, 5]
+    status: Status
 
-fact: Fact
-status: Status
-outcomes: HashMap[OutcomeTypes, Outcome]
+owner: public(address)
+facts: DynArray[Fact, 10]
 
-
-@external
-def __init__(_name: String[50], _description: String[500], _outcomes: Outcome[2]):
-    self.fact = Fact({
-        name: _name,
-        description: _description,
-    })
-    self.outcomes[OutcomeTypes.A] = _outcomes[0]
-    self.outcomes[OutcomeTypes.B] = _outcomes[1]
-    self.status = Status.OPEN
-
+event oracle_added:
+    setter: indexed(address)
+    total_oracles: uint256
 
 @external
-@view
-def get_fact() -> Fact:
-    return self.fact
+def __init__():
+    self.owner = msg.sender
 
 
 @external
 @view
-def get_outcomes() -> Outcome[2]:
-    return [self.outcomes[OutcomeTypes.A], self.outcomes[OutcomeTypes.B]]
+def get_fact(_idx: int128) -> Fact:
+    return self.facts[_idx]
+
+
+@external
+def create_fact(_name: String[50], _description: String[500]):
+    self.facts.append(Fact({
+        owner: msg.sender,
+        name: _name, 
+        description: _description, 
+        oracles: [], 
+        outcomes: [], 
+        status: Status.DRAFT
+    }))
+
+
+@external
+def add_oracle(_idx: int128, _oracle: address):
+    assert self.facts[_idx].owner == msg.sender, "Only the owner can add oracles"
+    assert len(self.facts[_idx].oracles) < 3, "Maximum oracles reached"
+    self.facts[_idx].oracles.append(_oracle)
+
+
+@external
+def add_outcome(_idx: int128, _name: String[50], _description: String[500]):
+    assert self.facts[_idx].owner == msg.sender, "Only the owner can add outcomes"
+    assert len(self.facts[_idx].outcomes) < 5, "Maximum outcomes reached"
+    self.facts[_idx].outcomes.append(Outcome({name: _name, description: _description}))
+    log oracle_added(msg.sender, len(self.facts[_idx].outcomes))
