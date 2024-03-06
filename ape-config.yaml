@@ -1,8 +1,1 @@
 name: vyp
-# default_ecosystem: ethereum
-# ethereum:
-#   default_network: local
-#   local:
-#     default_provider: test
-hardhat:
-  host: auto

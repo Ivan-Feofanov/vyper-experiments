@@ -32,5 +32,4 @@ jobs:
       - name: Run tests
         run: |
           source .venv/bin/activate
-          ape plugins install hardhat
           ape test -s
