@@ -33,9 +33,6 @@ owner: public(address)
 facts: DynArray[Fact, 10]
 fact_bets: HashMap[int128, DynArray[Bet, MAX_BETS]]
 
-event oracle_added:
-    setter: indexed(address)
-    total_oracles: uint256
 
 @external
 def __init__():
@@ -70,12 +67,11 @@ def add_oracle(_idx: int128, _oracle: address):
 
 
 @external
-def add_outcome(_idx: int128, _name: String[50], _description: String[500]):
+def add_outcome(_idx: uint256, _name: String[50], _description: String[500]):
     assert self.facts[_idx].owner == msg.sender, "Only the owner can add outcomes"
-    # assert len(self.facts[_idx].outcomes) < 5, "Maximum outcomes reached"
+    assert len(self.facts[_idx].outcomes) < 5, "Maximum outcomes reached"
     
     self.facts[_idx].outcomes.append(Outcome({name: _name, description: _description, total: 0}))
-    log oracle_added(msg.sender, len(self.facts[_idx].outcomes))
 
 
 @external

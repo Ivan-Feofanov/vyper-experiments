@@ -34,11 +34,11 @@ class Fact:
 def fact(oracles) -> Fact:
     fact = Fact(
         name=fake.name(),
-        description=fake.text(),
+        description=fake.sentence(),
         oracles=oracles,
         outcomes=[
-            Outcome(fake.sentence(), fake.text()),
-            Outcome(fake.sentence(), fake.text()),
+            Outcome(fake.word(), fake.sentence()),
+            Outcome(fake.word(), fake.sentence()),
         ],
     )
     return fact
