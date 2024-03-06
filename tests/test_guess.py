@@ -154,24 +154,14 @@ def test_run_guess__no_oracles(guess_service, fact, sender):
     assert created_fact.status == Status.DRAFT
 
 
-def test_place_bet(guess_service, fact, oracles, sender, accounts):
-    guess_service.create_fact(fact.name, fact.description, sender=sender)
-    guess_service.add_oracle(0, oracles[0], sender=sender)
-    guess_service.add_oracle(0, oracles[1], sender=sender)
-    guess_service.add_outcome(
-        0, fact.outcomes[0].name, fact.outcomes[0].description, sender=sender
-    )
-    guess_service.add_outcome(
-        0, fact.outcomes[1].name, fact.outcomes[1].description, sender=sender
-    )
-    guess_service.start_guess(0, sender=sender)
+def test_place_bet(prepared_service, fact, oracles, sender, accounts):
     first_better = accounts[4]
     second_better = accounts[5]
 
-    guess_service.place_bet(0, 0, sender=first_better, value=100)
-    guess_service.place_bet(0, 1, sender=second_better, value=200)
+    prepared_service.place_bet(0, 0, sender=first_better, value=100)
+    prepared_service.place_bet(0, 1, sender=second_better, value=200)
 
-    created_fact = guess_service.get_fact(0)
+    created_fact = prepared_service.get_fact(0)
     assert created_fact.outcomes[0].total == 100
     assert created_fact.outcomes[1].total == 200
     assert created_fact.total == 300
